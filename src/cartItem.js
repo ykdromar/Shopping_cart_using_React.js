@@ -7,10 +7,11 @@ class cartItem extends React.Component{
         this.state={
             title:"Samsung Galaxy F12",
             price:"12999",
-            quantity:5,
+            quantity:1,
             img:'https://www.gizmochina.com/wp-content/uploads/2021/04/cats-500x500.jpg'
         };
     }
+
     increaseQuantity=()=>{
         //form 1 setState(), when previous state is not required
         // this.setState({

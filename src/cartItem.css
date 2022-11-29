@@ -6,6 +6,8 @@
     justify-content: space-around;
     align-items: center;
     row-gap: 5px;
+    margin-bottom: 10px;
+
 }
 .icon{
     width:40%;

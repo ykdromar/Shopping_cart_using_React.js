@@ -1,7 +1,7 @@
 import React from 'react';
 // import add from'./add.png'
 import './cartItem.css';
-class cartItem extends React.Component{
+class CartItem extends React.Component{
     constructor(){
         super()
         this.state={
@@ -65,4 +65,4 @@ class cartItem extends React.Component{
     }
 }
 
-export default cartItem;
+export default CartItem;

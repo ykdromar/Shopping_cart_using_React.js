@@ -1,66 +1,113 @@
 import React from 'react';
 import Cart from './Cart';
 import Navbar from './Navbar';
+import 'firebase/firestore';
+// import app from './index';
+import { initializeApp } from "firebase/app";
+import { getFirestore,collection, onSnapshot,doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import firebaseConfig from './firebaseConfig';
+
+
+// Initialize Firebase
+const app=initializeApp(firebaseConfig);
+
+const db=getFirestore(app);
 class App extends React.Component {
   constructor(){
     super()
     this.state={
-        products:[
-        {
-            id:1,
-            title:"Samsung Galaxy F12",
-            price:"12999",
-            quantity:1,
-            img:'https://www.gizmochina.com/wp-content/uploads/2021/04/cats-500x500.jpg'
-        },
-        {
-            id:2,
-            title:"Samsung Galaxy F12",
-            price:"12999",
-            quantity:1,
-            img:'https://www.gizmochina.com/wp-content/uploads/2021/04/cats-500x500.jpg'
-        },
-        {
-            id:3,
-            title:"Samsung Galaxy F13",
-            price:"12999",
-            quantity:1,
-            img:'https://www.gizmochina.com/wp-content/uploads/2021/04/cats-500x500.jpg'
-        },
-        ],
+        products:[],
+        loading:true,
     };
+}
+
+ async componentDidMount(){
+
+  // without sync with firebase
+//   let products=[];
+//   let i=1;
+//  var docs=await getDocs(collection(db,'/products'))
+// docs.forEach((doc)=>{
+//   let product=doc.data();
+//   product['id']=i++;
+//   products.push(product);
+// })
+// console.log("mount");
+// console.log(products);
+// this.setState({
+//   products,
+//   loading:false
+
+// });
+
+// sync with firebase using listener
+let products=[];
+  // let i=1;
+ onSnapshot(collection(db, '/products'),(snapshot)=>{
+  // console.log(snapshot);
+  products=snapshot.docs.map((doc)=>{
+    console.log(doc.data());
+    let product= doc.data();
+    product['id']=doc.id;
+    return product;
+  });
+    this.setState({
+      products,
+      loading:false
+    })
+ });
+ 
+
+}
+componentWillUnmount(){
+  console.log("unmount");
 }
 
 handelIncreaseQuantity=(product)=>{
     console.log("increase",product);
-    const {products}=this.state;
-    const idx=products.indexOf(product);
-    products[idx].quantity+=1;
-    this.setState({
-        products:products
-    })
+    // const {products}=this.state;
+    // const idx=products.indexOf(product);
+    //this was for without firebase
+    // products[idx].quantity+=1;
+    // this.setState({
+    //     products:products,
+    // })
+
+    //with firebase 
+    let docRef=doc(db,'/products',product.id);
+    updateDoc(docRef,'quantity',product.quantity+1);
+    
+
 }
 handelDecreaseQuantity=(product)=>{
     console.log("Decrease",product);
     const{products}=this.state;
     const idx=products.indexOf(product);
-    if(products[idx].quantity>1){
-        products[idx].quantity-=1;
-        this.setState({
-            products:products
-        });
+    if(products[idx].quantity>0){
+      //without firebase
+        // products[idx].quantity-=1;
+        // this.setState({
+        //     products:products
+        // });
+
+        //with firebase
+        let docRef=doc(db,'/products',product.id);
+        updateDoc(docRef,'quantity',products[idx].quantity-1);
     }
-    else if(products[idx].quantity==1){
-      this.handelDeleteProduct(products[idx].id);
-    }
+    
 }
 handelDeleteProduct=(id)=>{
-    console.log("delete",id);
-    const {products}=this.state;
-    const newProducts=products.filter((product)=>product.id!==id);
-    this.setState({
-        products:newProducts
-    })
+  //without firebase
+    // console.log("delete",id);
+    // const {products}=this.state;
+    // const newProducts=products.filter((product)=>product.id!==id);
+    // this.setState({
+    //     products:newProducts
+    // })
+
+    //with firebase
+    let docRef=doc(db,'/products',id);
+    deleteDoc(docRef);
 }
 
 getCount=()=>{
@@ -81,7 +128,8 @@ getTotalPrice=()=>{
   return totalPrice;
 }
   render (){
-    const {products}=this.state;
+    const {products,loading}=this.state;
+    console.log("render");
       return(
       <div className="App">
         <Navbar
@@ -94,6 +142,7 @@ getTotalPrice=()=>{
         handelDeleteProduct={this.handelDeleteProduct}
         />
         <div id="total-price">Total Price: {this.getTotalPrice()}</div>
+        {loading&&<h3>Loading, Please Wait...</h3>}
       </div>
       
       );
